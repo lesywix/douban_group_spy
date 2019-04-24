@@ -74,7 +74,7 @@ def crawl(group_id, pages, keywords, exclude):
     try:
         group = Group.objects.get(id=group_id)
     except ObjectDoesNotExist:
-        g_info = requests.get(GROUP_INFO_BASE_URL.format(group_id)).json()
+        g_info = requests.get(GROUP_INFO_BASE_URL.format(DOUBAN_BASE_HOST[0], group_id)).json()
         lg.info(f'Getting group: {group_id} successful')
         group = Group(
             id=g_info['uid'],
