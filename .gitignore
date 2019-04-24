@@ -17,3 +17,4 @@ venv/
 .vscode
 
 *.pem
+/db.sqlite3
