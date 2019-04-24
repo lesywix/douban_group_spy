@@ -8,7 +8,7 @@ from jsonfield import JSONField
 
 class Group(Model):
     id = CharField(max_length=24, unique=True, primary_key=True)
-    group_name = CharField(max_length=32)
+    name = CharField(max_length=32)
     alt = CharField(max_length=128)
     member_count = IntegerField()
 
@@ -28,18 +28,20 @@ class Group(Model):
 class Post(Model):
     post_id = CharField(max_length=24, unique=True)
     group = ForeignKey(Group, on_delete=DO_NOTHING)
-    author_info = JSONField(default={})
+    author_info = JSONField(default={}, dump_kwargs={'ensure_ascii': False})
     alt = CharField(max_length=128)
     title = CharField(max_length=128)
     content = TextField()
-    photo_list = JSONField(default=[])
+    photo_list = JSONField(default=[], dump_kwargs={'ensure_ascii': False})
 
     rent = FloatField(null=True)
     subway = CharField(max_length=12, null=True)
     contact = CharField(max_length=68, null=True)
 
     is_matched = BooleanField(default=False)
-    keyword_list = JSONField(default=[])
+    keyword_list = JSONField(default=[], dump_kwargs={'ensure_ascii': False})
+
+    comment = CharField(max_length=128, null=True, blank=True)
 
     created = DateTimeField()
     updated = DateTimeField()

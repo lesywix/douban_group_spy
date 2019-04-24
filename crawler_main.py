@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# coding=utf-8
+
 import os
 import time
 from datetime import datetime
@@ -75,7 +78,7 @@ def crawl(group_id, pages, keywords, exclude):
         lg.info(f'Getting group: {group_id} successful')
         group = Group(
             id=g_info['uid'],
-            group_name=g_info['name'],
+            name=g_info['name'],
             alt=g_info['alt'],
             member_count=g_info['member_count'],
             created=make_aware(datetime.strptime(g_info['created'], DATETIME_FORMAT))
