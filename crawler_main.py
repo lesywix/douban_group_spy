@@ -1,6 +1,7 @@
 import os
 import time
 from datetime import datetime
+from itertools import cycle
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.timezone import make_aware
@@ -16,11 +17,12 @@ import requests
 from threading import Thread
 import logging
 
-from douban_group_spy.settings import GROUP_TOPICS_BASE_URL, GROUP_INFO_BASE_URL
+from douban_group_spy.settings import GROUP_TOPICS_BASE_URL, GROUP_INFO_BASE_URL, DOUBAN_BASE_HOST
 from douban_group_spy.models import Group, Post
 
 
 lg = logging.getLogger(__name__)
+douban_base_host = cycle(DOUBAN_BASE_HOST)
 
 
 def process_posts(posts, group, keywords, exclude):
@@ -37,7 +39,7 @@ def process_posts(posts, group, keywords, exclude):
         post = Post.objects.filter(post_id=t['id']).first()
         # ignore same id
         if post:
-            post.updated = t['updated']
+            post.updated = make_aware(datetime.strptime(t['updated'], DATETIME_FORMAT))
             post.save(force_update=['updated'])
             continue
         # ignore same title
@@ -81,12 +83,20 @@ def crawl(group_id, pages, keywords, exclude):
         group.save(force_insert=True)
 
     for p in range(pages):
-        lg.debug(f'getting group: {group_id}, page: {p}')
-        posts = requests.get(
-            GROUP_TOPICS_BASE_URL.format(group_id),
-            params={'start': p},
-            headers={'User-Agent': USER_AGENT}
-        ).json()
+        time.sleep(1)
+        kwargs = {
+            'url': GROUP_TOPICS_BASE_URL.format(next(douban_base_host), group_id),
+            'params': {'start': p},
+            'headers': {'User-Agent': USER_AGENT}
+        }
+        req = getattr(requests, 'get')(**kwargs)
+        lg.info(f'getting group: {group_id}, page: {p}, status: {req.status_code}')
+        # if 400, switch host
+        if req.status_code == 400:
+            lg.info('Rate limit, switching host...')
+            req = getattr(requests, 'get')(**kwargs)
+
+        posts = req.json()
         process_posts(posts, group, keywords, exclude)
 
 
@@ -107,6 +117,7 @@ def main(groups: tuple, keywords: tuple, exclude: tuple, sleep, pages, v):
             threads.append(process)
         for process in threads:
             process.join()
+        lg.info('Sleeping...')
         time.sleep(sleep)
 
 

@@ -25,7 +25,7 @@ SECRET_KEY = 'l^88o2rvrdv&f1(2#r3#9*#-k6dm%__&_mcus!f3y=gs=9892o'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -120,5 +120,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-GROUP_TOPICS_BASE_URL = 'https://api.douban.com/v2/group/{}/topics'
-GROUP_INFO_BASE_URL = 'https://api.douban.com/v2/group/{}/'
+DOUBAN_BASE_HOST = ('https://douban.uieee.com', 'https://api.douban.com')
+
+GROUP_TOPICS_BASE_URL = '{}/v2/group/{}/topics'
+GROUP_INFO_BASE_URL = '{}/v2/group/{}/'
