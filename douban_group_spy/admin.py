@@ -9,11 +9,13 @@ from douban_group_spy.models import Post, Group
 @admin.register(Post)
 class PostAdmin(ModelAdmin):
     list_display = ('post_id', 'get_group_name', 'title', 'show_alt', 'is_matched', 'keyword_list', 'created', 'updated')
+    list_filter = ('group__name', 'is_matched', 'keyword_list')
+    search_fields = ('title__icontains', 'content__icontains')
 
     def get_group_name(self, obj):
-        return obj.group.group_name
+        return obj.group.name
     get_group_name.short_description = 'Group name'
-    get_group_name.admin_order_field = 'group__group_name'
+    get_group_name.admin_order_field = 'group__name'
 
     def show_alt(self, obj):
         return format_html(ALT_FORMAT, url=obj.alt)
@@ -22,7 +24,7 @@ class PostAdmin(ModelAdmin):
 
 @admin.register(Group)
 class GroupAdmin(ModelAdmin):
-    list_display = ('id', 'group_name', 'show_alt', 'member_count', 'created')
+    list_display = ('id', 'name', 'show_alt', 'member_count', 'created')
 
     def show_alt(self, obj):
         return format_html(ALT_FORMAT, url=obj.alt)
