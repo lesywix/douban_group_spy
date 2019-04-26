@@ -42,11 +42,14 @@ def process_posts(posts, group, keywords, exclude):
         post = Post.objects.filter(post_id=t['id']).first()
         # ignore same id
         if post:
+            lg.info(f'[post] update existing post: {post.post_id}')
             post.updated = make_aware(datetime.strptime(t['updated'], DATETIME_FORMAT))
-            post.save(force_update=['updated'])
+            post.title = t['title']
+            post.save(force_update=['updated', 'title'])
             continue
         # ignore same title
         if Post.objects.filter(title=t['title']).exists():
+            lg.info(f'[post] ignore same title...')
             continue
 
         keyword_list = []
@@ -67,6 +70,7 @@ def process_posts(posts, group, keywords, exclude):
             updated=make_aware(datetime.strptime(t['updated'], DATETIME_FORMAT))
         )
         post.save(force_insert=True)
+        lg.info(f'[post] save post: {post.post_id}')
 
 
 def crawl(group_id, pages, keywords, exclude):
@@ -74,7 +78,7 @@ def crawl(group_id, pages, keywords, exclude):
     try:
         group = Group.objects.get(id=group_id)
     except ObjectDoesNotExist:
-        g_info = requests.get(GROUP_INFO_BASE_URL.format(DOUBAN_BASE_HOST[0], group_id)).json()
+        g_info = requests.get(GROUP_INFO_BASE_URL.format(DOUBAN_BASE_HOST[1], group_id)).json()
         lg.info(f'Getting group: {group_id} successful')
         group = Group(
             id=g_info['uid'],
@@ -86,18 +90,24 @@ def crawl(group_id, pages, keywords, exclude):
         group.save(force_insert=True)
 
     for p in range(pages):
-        time.sleep(1)
+        time.sleep(5)
+        host = DOUBAN_BASE_HOST[0]
         kwargs = {
-            'url': GROUP_TOPICS_BASE_URL.format(next(douban_base_host), group_id),
+            'url': GROUP_TOPICS_BASE_URL.format(host, group_id),
             'params': {'start': p},
             'headers': {'User-Agent': USER_AGENT}
         }
         req = getattr(requests, 'get')(**kwargs)
-        lg.info(f'getting group: {group_id}, page: {p}, status: {req.status_code}')
+        lg.info(f'getting: {req.url}, status: {req.status_code}')
         # if 400, switch host
-        if req.status_code == 400:
-            lg.info('Rate limit, switching host...')
+        if req.status_code != 200:
+            kwargs['url'] = GROUP_TOPICS_BASE_URL.format(next(douban_base_host), group_id)
+            lg.info(f'Rate limit, switching host')
             req = getattr(requests, 'get')(**kwargs)
+            lg.info(f'getting group: {req.url}, status: {req.status_code}')
+            if req.status_code != 200:
+                lg.warning(f'Fail to getting: {req.url}, status: {req.status_code}')
+                continue
 
         posts = req.json()
         process_posts(posts, group, keywords, exclude)
