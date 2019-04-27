@@ -17,7 +17,6 @@ django.setup()
 
 import click
 import requests
-from threading import Thread
 import logging
 
 from douban_group_spy.settings import GROUP_TOPICS_BASE_URL, GROUP_INFO_BASE_URL, DOUBAN_BASE_HOST
@@ -90,7 +89,7 @@ def crawl(group_id, pages, keywords, exclude):
         group.save(force_insert=True)
 
     for p in range(pages):
-        time.sleep(5)
+        time.sleep(8)
         host = DOUBAN_BASE_HOST[0]
         kwargs = {
             'url': GROUP_TOPICS_BASE_URL.format(host, group_id),
@@ -123,13 +122,8 @@ def crawl(group_id, pages, keywords, exclude):
 def main(groups: tuple, keywords: tuple, exclude: tuple, sleep, pages, v):
     logging.basicConfig(level=logging.DEBUG) if v else logging.basicConfig(level=logging.INFO)
     while True:
-        threads = []
         for g_id in groups:
-            process = Thread(target=crawl, args=[g_id, pages, keywords, exclude])
-            process.start()
-            threads.append(process)
-        for process in threads:
-            process.join()
+            crawl(g_id, pages, keywords, exclude)
         lg.info('Sleeping...')
         time.sleep(sleep)
 
