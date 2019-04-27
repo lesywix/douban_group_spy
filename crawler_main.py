@@ -2,6 +2,7 @@
 # coding=utf-8
 
 import os
+import re
 import time
 from datetime import datetime
 from itertools import cycle
@@ -54,7 +55,8 @@ def process_posts(posts, group, keywords, exclude):
         keyword_list = []
         is_matched = False
         for k in keywords:
-            if k in t['title'] or k in t['content']:
+            k_pattern = '.?'.join([i for i in k])
+            if re.search(k_pattern, t['title']) or re.search(k_pattern, t['content']):
                 keyword_list.append(k)
                 is_matched = True
 
@@ -100,7 +102,8 @@ def crawl(group_id, pages, keywords, exclude):
         lg.info(f'getting: {req.url}, status: {req.status_code}')
         # if 400, switch host
         if req.status_code != 200:
-            kwargs['url'] = GROUP_TOPICS_BASE_URL.format(next(douban_base_host), group_id)
+            host = next(douban_base_host)
+            kwargs['url'] = GROUP_TOPICS_BASE_URL.format(host, group_id)
             lg.info(f'Rate limit, switching host')
             req = getattr(requests, 'get')(**kwargs)
             lg.info(f'getting group: {req.url}, status: {req.status_code}')
