@@ -1,5 +1,7 @@
+import json
+
 from django.contrib import admin
-from django.contrib.admin import ModelAdmin
+from django.contrib.admin import ModelAdmin, SimpleListFilter
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
@@ -17,6 +19,21 @@ def get_model_fields(model, exclude=None):
     return fields
 
 
+class KeywordFilter(SimpleListFilter):
+    title = 'keyword_list'
+    parameter_name = 'keyword_list'
+
+    def lookups(self, request, model_admin):
+        keyword_lists = model_admin.model.objects.values('keyword_list').distinct()
+        return sorted([(k['keyword_list'], k['keyword_list']) for k in keyword_lists])
+
+    def queryset(self, request, queryset):
+        if self.value():
+            qs = queryset.filter(keyword_list=json.loads(self.value()))
+            return qs
+        return queryset
+
+
 @admin.register(Post)
 class PostAdmin(ModelAdmin):
     list_display = (
@@ -30,7 +47,7 @@ class PostAdmin(ModelAdmin):
         'created',
         'updated'
     )
-    list_filter = ('group__name', 'is_matched', 'keyword_list')
+    list_filter = ('group__name', 'is_matched', KeywordFilter)
     search_fields = ('title', 'content')
     fields = (
         'post_id',
