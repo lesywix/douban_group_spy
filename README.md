@@ -35,10 +35,17 @@
 
 ### Screenshots
 文章列表
-![](https://github.com/weixianglin/douban_group_spy/img/screenshot1.png)
+
+![](https://github.com/weixianglin/douban_group_spy/raw/master/img/screenshots1.png)
+
 文章详情
-![](https://github.com/weixianglin/douban_group_spy/img/screenshot2.png)
+
+![](https://github.com/weixianglin/douban_group_spy/raw/master/img/screenshots2.png)
+
 小组列表
-![](https://github.com/weixianglin/douban_group_spy/img/screenshot3.png)
+
+![](https://github.com/weixianglin/douban_group_spy/raw/master/img/screenshots3.png)
+
 小组详情
-![](https://github.com/weixianglin/douban_group_spy/img/screenshot4.png)
+
+![](https://github.com/weixianglin/douban_group_spy/raw/master/img/screenshots4.png)
