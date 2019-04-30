@@ -42,6 +42,7 @@ class Post(Model):
     keyword_list = JSONField(default=[], dump_kwargs={'ensure_ascii': False})
 
     comment = CharField(max_length=128, null=True, blank=True)
+    is_collected = BooleanField(default=False)
 
     created = DateTimeField()
     updated = DateTimeField()
