@@ -123,7 +123,10 @@ def crawl(group_id, pages, keywords, exclude):
 @click.option('--pages', help='crawl page range', default=20)
 @click.option('-v', help='Show debug info', is_flag=True)
 def main(groups: tuple, keywords: tuple, exclude: tuple, sleep, pages, v):
-    logging.basicConfig(level=logging.DEBUG) if v else logging.basicConfig(level=logging.INFO)
+    if v:
+        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)-8s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+    else:
+        logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)-8s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
     while True:
         for g_id in groups:
             crawl(g_id, pages, keywords, exclude)
