@@ -119,8 +119,8 @@ def crawl(group_id, pages, keywords, exclude):
 @click.option('--groups', '-g', help='group id', required=True, multiple=True, type=str)
 @click.option('--keywords', '-k',  help='search keywords', multiple=True, type=str)
 @click.option('--exclude', '-e',  help='excluded keywords', multiple=True, type=str)
-@click.option('--sleep', help='time sleep', default=60 * 30)
-@click.option('--pages', help='crawl page range', default=20)
+@click.option('--sleep', help='time sleep', default=60 * 15)
+@click.option('--pages', help='crawl page range', default=10)
 @click.option('-v', help='Show debug info', is_flag=True)
 def main(groups: tuple, keywords: tuple, exclude: tuple, sleep, pages, v):
     if v:
