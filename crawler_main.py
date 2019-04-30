@@ -92,7 +92,7 @@ def crawl(group_id, pages, keywords, exclude):
 
     for p in range(pages):
         time.sleep(8)
-        host = DOUBAN_BASE_HOST[0]
+        host = next(douban_base_host)
         kwargs = {
             'url': GROUP_TOPICS_BASE_URL.format(host, group_id),
             'params': {'start': p},

@@ -47,7 +47,7 @@ class PostAdmin(ModelAdmin):
         'created',
         'updated'
     )
-    list_filter = ('group__name', 'is_matched', KeywordFilter)
+    list_filter = ('group__name', 'is_matched', 'is_collected', KeywordFilter)
     search_fields = ('title', 'content')
     fields = (
         'post_id',
@@ -55,6 +55,7 @@ class PostAdmin(ModelAdmin):
         'title',
         'show_alt',
         'is_matched',
+        'is_collected',
         'keyword_list',
         'rent',
         'subway',
@@ -66,7 +67,7 @@ class PostAdmin(ModelAdmin):
         'photos',
         'comment',
     )
-    readonly_fields = get_model_fields(Post, 'comment') + ['photos', 'show_alt']
+    readonly_fields = get_model_fields(Post, ['comment', 'is_collected']) + ['photos', 'show_alt']
     ordering = ('created', 'updated')
 
     def get_group_name(self, obj):
