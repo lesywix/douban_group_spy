@@ -4,7 +4,7 @@
 为了方便，使用了 Django admin 进行数据的可视化。通过 Django admin 可对数据进行搜索，过滤等简单功能。
 
 ## 环境
-- python 3
+- python >= 3.6
 - sqlite
 
 ## 使用
