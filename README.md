@@ -9,9 +9,10 @@
 
 ## 使用
 1. 创建 venv `python3 -m venv venv`, 并激活 `. venv/bin/activate`
-2. 数据库初始化 `make migrate`
-3. 运行爬虫 eg: `python crawler_main.py -g 106955 -g baoanzufang -k 灵芝 -k 翻身 -e 求租` 
-4. 运行网页 `make run_server`, 默认账号密码均为 admin
+2. 安装依赖 `pip install -r requirements.txt`
+3. 数据库初始化 `make migrate`
+4. 运行爬虫 eg: `python crawler_main.py -g 106955 -g baoanzufang -k 灵芝 -k 翻身 -e 求租` 
+5. 运行网页 `make run_server`, 默认账号密码均为 admin
 
 ### 爬虫参数
 - `-g`: 要爬取小组的 id
