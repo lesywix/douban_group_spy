@@ -25,7 +25,7 @@ from douban_group_spy.models import Group, Post
 
 
 lg = logging.getLogger(__name__)
-douban_base_host = cycle(DOUBAN_BASE_HOST)
+# douban_base_host = cycle(DOUBAN_BASE_HOST)
 
 
 def process_posts(posts, group, keywords, exclude):
@@ -79,7 +79,7 @@ def crawl(group_id, pages, keywords, exclude):
     try:
         group = Group.objects.get(id=group_id)
     except ObjectDoesNotExist:
-        g_info = requests.get(GROUP_INFO_BASE_URL.format(DOUBAN_BASE_HOST[1], group_id)).json()
+        g_info = requests.get(GROUP_INFO_BASE_URL.format(DOUBAN_BASE_HOST, group_id), headers={'User-Agent': USER_AGENT}).json()
         lg.info(f'Getting group: {group_id} successful')
         group = Group(
             id=g_info['uid'],
@@ -92,9 +92,9 @@ def crawl(group_id, pages, keywords, exclude):
 
     for p in range(pages):
         time.sleep(8)
-        host = next(douban_base_host)
+        # host = next(douban_base_host)
         kwargs = {
-            'url': GROUP_TOPICS_BASE_URL.format(host, group_id),
+            'url': GROUP_TOPICS_BASE_URL.format(DOUBAN_BASE_HOST, group_id),
             'params': {'start': p},
             'headers': {'User-Agent': USER_AGENT}
         }
@@ -102,8 +102,8 @@ def crawl(group_id, pages, keywords, exclude):
         lg.info(f'getting: {req.url}, status: {req.status_code}')
         # if 400, switch host
         if req.status_code != 200:
-            host = next(douban_base_host)
-            kwargs['url'] = GROUP_TOPICS_BASE_URL.format(host, group_id)
+            # host = next(douban_base_host)
+            kwargs['url'] = GROUP_TOPICS_BASE_URL.format(DOUBAN_BASE_HOST, group_id)
             lg.info(f'Rate limit, switching host')
             req = getattr(requests, 'get')(**kwargs)
             lg.info(f'getting group: {req.url}, status: {req.status_code}')

@@ -120,7 +120,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-DOUBAN_BASE_HOST = ('https://api.douban.com', 'https://douban.uieee.com')
+DOUBAN_BASE_HOST = 'https://api.douban.com'
 
 GROUP_TOPICS_BASE_URL = '{}/v2/group/{}/topics'
 GROUP_INFO_BASE_URL = '{}/v2/group/{}/'
