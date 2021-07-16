@@ -120,7 +120,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-DOUBAN_BASE_HOST = 'https://api.douban.com'
+DOUBAN_BASE_HOST = 'https://www.douban.com'
 
-GROUP_TOPICS_BASE_URL = '{}/v2/group/{}/topics'
-GROUP_INFO_BASE_URL = '{}/v2/group/{}/'
+GROUP_TOPICS_BASE_URL = '{}/group/{}/discussion'
+GROUP_INFO_BASE_URL = '{}/group/{}/'

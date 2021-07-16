@@ -5,12 +5,14 @@ import os
 import re
 import time
 from datetime import datetime
+from datetime import date
 from itertools import cycle
+from bs4 import BeautifulSoup
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.timezone import make_aware
 
-from douban_group_spy.const import USER_AGENT, DATETIME_FORMAT
+from douban_group_spy.const import USER_AGENT, DATETIME_FORMAT, DATE_FORMAT
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'douban_group_spy.settings')
 import django
@@ -29,7 +31,7 @@ lg = logging.getLogger(__name__)
 
 
 def process_posts(posts, group, keywords, exclude):
-    for t in posts['topics']:
+    for t in posts:
         # ignore title or content including exclude keywords
         exclude_flag = False
         for e in exclude:
@@ -79,14 +81,17 @@ def crawl(group_id, pages, keywords, exclude):
     try:
         group = Group.objects.get(id=group_id)
     except ObjectDoesNotExist:
-        g_info = requests.get(GROUP_INFO_BASE_URL.format(DOUBAN_BASE_HOST, group_id), headers={'User-Agent': USER_AGENT}).json()
+        html = requests.get(GROUP_INFO_BASE_URL.format(DOUBAN_BASE_HOST, group_id), headers={'User-Agent': USER_AGENT}).text
+        g_info = BeautifulSoup(html,'lxml')
         lg.info(f'Getting group: {group_id} successful')
+        member_count_text=g_info.select_one(f"a[href='https://www.douban.com/group/{group_id}/members']").get_text()
+        created_text=g_info.select_one('div[class="group-board"] p').get_text()
         group = Group(
-            id=g_info['uid'],
-            name=g_info['name'],
-            alt=g_info['alt'],
-            member_count=g_info['member_count'],
-            created=make_aware(datetime.strptime(g_info['created'], DATETIME_FORMAT))
+            id=group_id,
+            name=g_info.select_one('h1').get_text().strip(),
+            alt=g_info.select_one("div[class='group-intro']").get_text(),
+            member_count=int(re.findall(r'[(](.*?)[)]', member_count_text)[0]),
+            created=make_aware(datetime.strptime(re.findall(r"创建于(.+?) ",created_text)[0], DATE_FORMAT))
         )
         group.save(force_insert=True)
 
@@ -95,7 +100,7 @@ def crawl(group_id, pages, keywords, exclude):
         # host = next(douban_base_host)
         kwargs = {
             'url': GROUP_TOPICS_BASE_URL.format(DOUBAN_BASE_HOST, group_id),
-            'params': {'start': p},
+            'params': {'start': p*25},
             'headers': {'User-Agent': USER_AGENT}
         }
         req = getattr(requests, 'get')(**kwargs)
@@ -111,9 +116,23 @@ def crawl(group_id, pages, keywords, exclude):
                 lg.warning(f'Fail to getting: {req.url}, status: {req.status_code}')
                 continue
 
-        posts = req.json()
+        soup = BeautifulSoup(req.text,'lxml')
+        posts=[]
+        for row in soup.select('table[class="olt"] tr[class=""]'):
+            result={}
+            link=row.select_one('td[class="title"] a')
+            result['id']=int(re.findall(r"https://www.douban.com/group/topic/(.+?)/",link["href"])[0])
+            result['title']=link["title"]
+            result['content']=''
+            result['alt']=''
+            author_link=row.select("td")[1].select_one('a')
+            result['author']={'name':author_link.get_text(),'alt':author_link["href"]}
+            result['photos']=[]
+            result['created']='1970-01-01 00:00:00'
+            result['updated']=f'{date.today().year}-{row.select("td")[3].get_text()}:00'
+            posts.append(result)
         process_posts(posts, group, keywords, exclude)
-
+    
 
 @click.command(help='example: python crawler_main.py -g 10086 -g 12345 -k xx花园 -k xx地铁 -e 求租')
 @click.option('--groups', '-g', help='group id', required=True, multiple=True, type=str)
