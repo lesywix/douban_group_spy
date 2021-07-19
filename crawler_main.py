@@ -66,7 +66,7 @@ def process_posts(posts, group, keywords, exclude):
             post_id=t['id'], group=group,
             author_info=t['author'], alt=t['alt'],
             title=t['title'], content=t['content'],
-            photo_list=[i['alt'] for i in t['photos']],
+            photo_list=t['photos'],
             # rent=0.0, subway='', contact='',
             is_matched=is_matched, keyword_list=keyword_list,
             created=make_aware(datetime.strptime(t['created'], DATETIME_FORMAT)),
@@ -119,16 +119,24 @@ def crawl(group_id, pages, keywords, exclude):
         soup = BeautifulSoup(req.text,'lxml')
         posts=[]
         for row in soup.select('table[class="olt"] tr[class=""]'):
-            result={}
             link=row.select_one('td[class="title"] a')
-            result['id']=int(re.findall(r"https://www.douban.com/group/topic/(.+?)/",link["href"])[0])
+            link_href=link["href"]
+            post_detail_html = requests.get(link_href, headers={'User-Agent': USER_AGENT}).text
+            post_detail = BeautifulSoup(post_detail_html,'lxml')
+            post_content=post_detail.select_one('div[class="topic-content"]')
+            post_photos=[]
+            for photo_row in post_content.select('img'):
+                post_photos.append(photo_row['src'])
+
+            result={}
+            result['id']=int(re.findall(r"https://www.douban.com/group/topic/(.+?)/",link_href)[0])
             result['title']=link["title"]
-            result['content']=''
-            result['alt']=''
+            result['content']=post_content.get_text().strip()
+            result['alt']=link_href
             author_link=row.select("td")[1].select_one('a')
             result['author']={'name':author_link.get_text(),'alt':author_link["href"]}
-            result['photos']=[]
-            result['created']='1970-01-01 00:00:00'
+            result['photos']=post_photos
+            result['created']=post_detail.select_one('.create-time').get_text()
             result['updated']=f'{date.today().year}-{row.select("td")[3].get_text()}:00'
             posts.append(result)
         process_posts(posts, group, keywords, exclude)
