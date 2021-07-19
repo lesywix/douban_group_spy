@@ -2,7 +2,7 @@ beautifulsoup4==4.9.3
 certifi==2021.5.30
 charset-normalizer==2.0.2
 Click==7.0
-Django==2.2.20
+Django==2.2.24
 idna==3.2
 jsonfield==2.0.2
 lxml==4.6.3
