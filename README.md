@@ -1,6 +1,8 @@
 # 豆瓣小组爬虫
 
-## **Update：豆瓣的接口废了**
+## 2021.07.19 Update: 感谢 [xwjdsh](https://github.com/xwjdsh) 的 [PR](https://github.com/lesywix/douban_group_spy/pull/11)，项目复活了
+
+## ~~Update：豆瓣的接口废了~~
 
 通过调用豆瓣接口，聚合想要爬取小组的租房信息，并可通过关键词进行匹配及排除。
 
