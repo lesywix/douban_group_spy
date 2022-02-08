@@ -124,3 +124,5 @@ DOUBAN_BASE_HOST = 'https://www.douban.com'
 
 GROUP_TOPICS_BASE_URL = '{}/group/{}/discussion'
 GROUP_INFO_BASE_URL = '{}/group/{}/'
+
+COOKIE=''
