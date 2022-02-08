@@ -3,6 +3,7 @@
 
 import os
 import re
+import random
 import time
 from datetime import datetime
 from datetime import date
@@ -22,7 +23,7 @@ import click
 import requests
 import logging
 
-from douban_group_spy.settings import GROUP_TOPICS_BASE_URL, GROUP_INFO_BASE_URL, DOUBAN_BASE_HOST
+from douban_group_spy.settings import GROUP_TOPICS_BASE_URL, GROUP_INFO_BASE_URL, DOUBAN_BASE_HOST, COOKIE
 from douban_group_spy.models import Group, Post
 
 
@@ -81,27 +82,28 @@ def crawl(group_id, pages, keywords, exclude):
     try:
         group = Group.objects.get(id=group_id)
     except ObjectDoesNotExist:
-        html = requests.get(GROUP_INFO_BASE_URL.format(DOUBAN_BASE_HOST, group_id), headers={'User-Agent': USER_AGENT}).text
+        lg.info(GROUP_INFO_BASE_URL.format(DOUBAN_BASE_HOST, group_id))
+        html = requests.get(GROUP_INFO_BASE_URL.format(DOUBAN_BASE_HOST, group_id), headers={'User-Agent': USER_AGENT, 'Cookie': COOKIE}).text
         g_info = BeautifulSoup(html,'lxml')
         lg.info(f'Getting group: {group_id} successful')
         member_count_text=g_info.select_one(f"a[href='https://www.douban.com/group/{group_id}/members']").get_text()
-        created_text=g_info.select_one('div[class="group-board"] p').get_text()
+        created_text=g_info.select_one('.group-loc').get_text()
         group = Group(
             id=group_id,
             name=g_info.select_one('h1').get_text().strip(),
-            alt=g_info.select_one("div[class='group-intro']").get_text(),
+            alt=f'https://www.douban.com/group/{group_id}',
             member_count=int(re.findall(r'[(](.*?)[)]', member_count_text)[0]),
             created=make_aware(datetime.strptime(re.findall(r"创建于(.+?) ",created_text)[0], DATE_FORMAT))
         )
         group.save(force_insert=True)
 
     for p in range(pages):
-        time.sleep(8)
+        time.sleep(random.randint(5,8))
         # host = next(douban_base_host)
         kwargs = {
             'url': GROUP_TOPICS_BASE_URL.format(DOUBAN_BASE_HOST, group_id),
             'params': {'start': p*25},
-            'headers': {'User-Agent': USER_AGENT}
+            'headers': {'User-Agent': USER_AGENT,'Cookie': COOKIE}
         }
         req = getattr(requests, 'get')(**kwargs)
         lg.info(f'getting: {req.url}, status: {req.status_code}')
@@ -119,9 +121,10 @@ def crawl(group_id, pages, keywords, exclude):
         soup = BeautifulSoup(req.text,'lxml')
         posts=[]
         for row in soup.select('table[class="olt"] tr[class=""]'):
+            time.sleep(random.randint(3,5))
             link=row.select_one('td[class="title"] a')
             link_href=link["href"]
-            post_detail_html = requests.get(link_href, headers={'User-Agent': USER_AGENT}).text
+            post_detail_html = requests.get(link_href, headers={'User-Agent': USER_AGENT, 'Cookie': COOKIE}).text
             post_detail = BeautifulSoup(post_detail_html,'lxml')
             post_content=post_detail.select_one('div[class="topic-content"]')
             post_photos=[]
