@@ -133,11 +133,15 @@ def crawl(group_id, pages, keywords, exclude):
             link_href=link["href"]
             post_detail_html = requests.get(link_href, headers={'User-Agent': USER_AGENT, 'Cookie': COOKIE}).text
             post_detail = BeautifulSoup(post_detail_html,'lxml')
-            post_content=post_detail.select_one('div[class="topic-content"]')
-            post_photos=[]
-            for photo_row in post_content.select('img'):
-                post_photos.append(photo_row['src'])
-
+            # 以下部分可能出错，增加try/except
+            try:
+                post_content=post_detail.select_one('div[class="topic-content"]')
+                post_photos=[]
+                for photo_row in post_content.select('img'):
+                    post_photos.append(photo_row['src'])
+            except:
+                continue
+            
             result={}
             result['id']=int(re.findall(r"https://www.douban.com/group/topic/(.+?)/",link_href)[0])
             result['title']=link["title"]
