@@ -92,7 +92,7 @@ def crawl(group_id, pages, keywords, exclude):
             id=group_id,
             name=g_info.select_one('h1').get_text().strip(),
             alt=f'https://www.douban.com/group/{group_id}',
-            member_count=int(re.findall(r'[(](.*?)[)]', member_count_text)[0]),
+            member_count=re.findall(r'[(](.*?)[)]', member_count_text)[0].replace('+', '').replace('万', '0000'),
             created=make_aware(datetime.strptime(re.findall(r"创建于(.+?) ",created_text)[0], DATE_FORMAT))
         )
         group.save(force_insert=True)
