@@ -121,7 +121,14 @@ def crawl(group_id, pages, keywords, exclude):
         soup = BeautifulSoup(req.text,'lxml')
         posts=[]
         for row in soup.select('table[class="olt"] tr[class=""]'):
-            time.sleep(random.randint(3,5))
+            time.sleep(random.randint(2500,7500)/1005)
+            if random.randint(0,100) > 75:
+                # https://www.douban.com 
+                # https://www.douban.com/doulist/ 这里随便增加一个豆瓣地址访问混淆
+                requests.get(f'https://www.douban.com', headers={'User-Agent': USER_AGENT, 'Cookie': COOKIE})
+                if random.randint(0,100) > 50:
+                    requests.get(f'https://www.douban.com/doulist/', headers={'User-Agent': USER_AGENT, 'Cookie': COOKIE})
+
             link=row.select_one('td[class="title"] a')
             link_href=link["href"]
             post_detail_html = requests.get(link_href, headers={'User-Agent': USER_AGENT, 'Cookie': COOKIE}).text
