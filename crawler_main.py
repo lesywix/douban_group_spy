@@ -92,7 +92,7 @@ def crawl(group_id, pages, keywords, exclude):
             id=group_id,
             name=g_info.select_one('h1').get_text().strip(),
             alt=f'https://www.douban.com/group/{group_id}',
-            member_count=int(re.findall(r'[(](.*?)[)]', member_count_text)[0]),
+            member_count=re.findall(r'[(](.*?)[)]', member_count_text)[0].replace('+', '').replace('万', '0000'),
             created=make_aware(datetime.strptime(re.findall(r"创建于(.+?) ",created_text)[0], DATE_FORMAT))
         )
         group.save(force_insert=True)
@@ -121,16 +121,27 @@ def crawl(group_id, pages, keywords, exclude):
         soup = BeautifulSoup(req.text,'lxml')
         posts=[]
         for row in soup.select('table[class="olt"] tr[class=""]'):
-            time.sleep(random.randint(3,5))
+            time.sleep(random.randint(2500,7500)/1005)
+            if random.randint(0,100) > 75:
+                # https://www.douban.com 
+                # https://www.douban.com/doulist/ 这里随便增加一个豆瓣地址访问混淆
+                requests.get(f'https://www.douban.com', headers={'User-Agent': USER_AGENT, 'Cookie': COOKIE})
+                if random.randint(0,100) > 50:
+                    requests.get(f'https://www.douban.com/doulist/', headers={'User-Agent': USER_AGENT, 'Cookie': COOKIE})
+
             link=row.select_one('td[class="title"] a')
             link_href=link["href"]
             post_detail_html = requests.get(link_href, headers={'User-Agent': USER_AGENT, 'Cookie': COOKIE}).text
             post_detail = BeautifulSoup(post_detail_html,'lxml')
-            post_content=post_detail.select_one('div[class="topic-content"]')
-            post_photos=[]
-            for photo_row in post_content.select('img'):
-                post_photos.append(photo_row['src'])
-
+            # 以下部分可能出错，增加try/except
+            try:
+                post_content=post_detail.select_one('div[class="topic-content"]')
+                post_photos=[]
+                for photo_row in post_content.select('img'):
+                    post_photos.append(photo_row['src'])
+            except:
+                continue
+            
             result={}
             result['id']=int(re.findall(r"https://www.douban.com/group/topic/(.+?)/",link_href)[0])
             result['title']=link["title"]
