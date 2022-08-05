@@ -18,7 +18,7 @@
 1. 创建 venv `python3 -m venv venv`, 并激活 `. venv/bin/activate`
 2. 安装依赖 `pip install -r requirements.txt`
 3. 数据库初始化 `make migrate`
-4. 修改配置，由于豆瓣的限制，你需要设置 Cookie 后才能开始爬取。在网页上登录豆瓣，将 `douban_group_spy/settings.py` 中的 `COOKIE` 配置修改为你的 Cookie
+4. 修改配置，由于豆瓣的限制，你需要设置 Cookie 后才能开始爬取。在网页上登录豆瓣，将 `douban_group_spy/settings.py` 中的 `COOKIE` 配置修改为你的 Cookie (key 为 dbcl2)
 5. 运行爬虫 eg: `python crawler_main.py -g 106955 -g baoanzufang -k 灵芝 -k 翻身 -e 求租`
 6. 运行网页 `make run_server`, 默认账号密码均为 admin
 
