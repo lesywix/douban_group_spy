@@ -86,14 +86,22 @@ def crawl(group_id, pages, keywords, exclude):
         html = requests.get(GROUP_INFO_BASE_URL.format(DOUBAN_BASE_HOST, group_id), headers={'User-Agent': USER_AGENT, 'Cookie': COOKIE}).text
         g_info = BeautifulSoup(html,'lxml')
         lg.info(f'Getting group: {group_id} successful')
-        member_count_text=g_info.select_one(f"a[href='https://www.douban.com/group/{group_id}/members']").get_text()
-        created_text=g_info.select_one('.group-loc').get_text()
+        members_count_obj = g_info.select_one(f"a[href='https://www.douban.com/group/{group_id}/members']")
+        if members_count_obj:
+            member_count_text = members_count_obj.get_text()
+        else:
+            member_count_text = None
+        created_text_obj = g_info.select_one('.group-loc')
+        if created_text_obj:
+            created_text = created_text_obj.get_text()
+        else:
+            created_text = None
         group = Group(
             id=group_id,
             name=g_info.select_one('h1').get_text().strip(),
             alt=f'https://www.douban.com/group/{group_id}',
-            member_count=re.findall(r'[(](.*?)[)]', member_count_text)[0].replace('+', '').replace('万', '0000'),
-            created=make_aware(datetime.strptime(re.findall(r"创建于(.+?) ",created_text)[0], DATE_FORMAT))
+            member_count=re.findall(r'[(](.*?)[)]', member_count_text)[0].replace('+', '').replace('万', '0000') if member_count_text else 0,
+            created=make_aware(datetime.strptime(re.findall(r"创建于(.+?) ",created_text)[0], DATE_FORMAT)) if created_text else datetime.now(),
         )
         group.save(force_insert=True)
 
