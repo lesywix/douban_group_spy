@@ -1,5 +1,5 @@
 beautifulsoup4==4.9.3
-certifi==2023.7.22
+certifi==2024.7.4
 charset-normalizer==2.0.2
 Click==7.0
 Django==3.2.25
